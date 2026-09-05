@@ -1,0 +1,40 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Create Android platform
+        run: |
+          if [ ! -d "android" ]; then
+            flutter create --platforms=android .
+          fi
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build APK
+        run: flutter build apk --release --enable-experiment=dot-shorthands
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: TabranteApp-APK
+          path: build/app/outputs/flutter-apk/app-release.apk
